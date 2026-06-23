@@ -23,6 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
-# md design
-*.DESIGN.md
-*.GUIDE.md
+# env files
+.env
+.env.*
+!.env.example
+
+# md design docs
+DESIGN.md
+GUIDE.md
+README.md
