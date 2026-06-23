@@ -2,7 +2,9 @@
 // Covers US (NYSE/NASDAQ) and Indonesian (.JK / IDX) tickers.
 
 const BASE = import.meta.env.VITE_SUPABASE_URL
-const KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+const KEY =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export async function searchSymbols(query) {
   const q = query.trim()
