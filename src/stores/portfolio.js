@@ -4,6 +4,7 @@ import { valuate } from '@/lib/valuation'
 import { aggregate } from '@/lib/transactions'
 import { fetchAntamGoldPrice } from '@/lib/gold'
 import { fetchLiveNews, dedupeNews } from '@/lib/news'
+import { deriveHoldingColumns, txnSignature } from '@/lib/portfolioData'
 
 // Prices are considered "fresh" for this many minutes. Inside the window we
 // serve cached snapshots from the DB and never call the (heavy) Yahoo sync.
@@ -451,6 +452,66 @@ export const usePortfolioStore = defineStore('portfolio', {
       // If the transaction couldn't be written (e.g. table missing), keep the
       // asset but surface the error so the UI can warn.
       return { data: created, error: txError ?? null }
+    },
+
+    // --- Import / restore ---------------------------------------------------
+    // Restore a validated export payload (see lib/portfolioData.js). Two modes:
+    //   'replace' — wipe the current portfolio, then import everything fresh.
+    //   'merge'   — keep existing assets; add new ones; for assets matched by
+    //               symbol, append only transactions not already present.
+    // Reuses the resilient holding/transaction writers, so it works the same
+    // against Supabase or the localStorage ledger. Returns a result summary.
+    async importPortfolio(payload, { mode = 'merge' } = {}) {
+      const result = { mode, assetsAdded: 0, assetsMatched: 0, txnsAdded: 0, txnsSkipped: 0, errors: [] }
+
+      if (mode === 'replace') {
+        // Deleting a holding cascades its transactions (DB) / mirrors locally.
+        for (const h of [...this.holdings]) {
+          const { error } = await this.deleteHolding(h.id)
+          if (error) result.errors.push(`Could not remove ${h.symbol}: ${error.message}`)
+        }
+      }
+
+      // Index existing assets by symbol for merge matching.
+      const bySymbol = new Map()
+      for (const h of this.holdings) bySymbol.set(String(h.symbol ?? '').trim().toLowerCase(), h)
+
+      for (const asset of payload.assets) {
+        const sym = String(asset.meta.symbol ?? '').trim().toLowerCase()
+        const match = mode === 'merge' ? bySymbol.get(sym) : null
+
+        if (match) {
+          // Append only non-duplicate transactions to the existing asset.
+          result.assetsMatched++
+          const seen = new Set((this.transactionsByAsset[match.id] ?? []).map(txnSignature))
+          for (const t of asset.transactions) {
+            if (seen.has(txnSignature(t))) { result.txnsSkipped++; continue }
+            const { error } = await this.addTransaction({ ...t, asset_id: match.id })
+            if (error) result.errors.push(`${match.symbol}: ${error.message}`)
+            else { result.txnsAdded++; seen.add(txnSignature(t)) }
+          }
+          continue
+        }
+
+        // New asset — create identity + legacy position columns, then its ledger.
+        const row = deriveHoldingColumns(asset)
+        const { data: created, error } = await this.addHolding(row)
+        if (error || !created) {
+          result.errors.push(`Could not add ${asset.meta.symbol}: ${error?.message ?? 'unknown error'}`)
+          continue
+        }
+        result.assetsAdded++
+        bySymbol.set(sym, created)
+        for (const t of asset.transactions) {
+          const { error: txErr } = await this.addTransaction({ ...t, asset_id: created.id })
+          if (txErr) result.errors.push(`${asset.meta.symbol}: ${txErr.message}`)
+          else result.txnsAdded++
+        }
+      }
+
+      // Reload so derived getters (valuation, allocations) reflect the import.
+      await Promise.all([this.fetchHoldings(), this.fetchTransactions()])
+      return result
     },
 
     // Heavy: calls the edge function that hits Yahoo Finance.

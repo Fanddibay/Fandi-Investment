@@ -144,6 +144,9 @@
         </div>
       </div>
     </div>
+
+    <!-- Data Management: export / import / migrate -->
+    <DataManagementCard />
   </div>
 </template>
 
@@ -153,6 +156,7 @@ import { supabase } from '@/lib/supabase'
 import { sendTelegramAlert } from '@/lib/telegram'
 import { usePortfolioStore } from '@/stores/portfolio'
 import { buildBriefingMessage } from '@/lib/briefing'
+import DataManagementCard from '@/components/DataManagementCard.vue'
 
 const store = usePortfolioStore()
 
