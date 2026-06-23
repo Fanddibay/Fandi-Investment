@@ -24,8 +24,8 @@
       </RouterLink>
     </nav>
 
-    <!-- Refresh indicator -->
-    <div class="p-3 border-t border-[#2e3348]">
+    <!-- Refresh + Logout -->
+    <div class="p-3 border-t border-[#2e3348] space-y-1">
       <button
         @click="$emit('refresh')"
         class="w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-slate-500 hover:text-sky-400 hover:bg-[#22263a] transition-all duration-200 text-xs"
@@ -35,16 +35,43 @@
         </svg>
         <span class="hidden lg:block">Refresh</span>
       </button>
+
+      <button
+        @click="handleLogout"
+        :disabled="loggingOut"
+        aria-label="Log out"
+        class="w-full flex items-center justify-center lg:justify-start gap-2 px-3 py-2 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-xs"
+      >
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        <span class="hidden lg:block">{{ loggingOut ? 'Logging out…' : 'Log out' }}</span>
+      </button>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
-import { defineEmits, defineProps } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { defineEmits, defineProps, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
 defineProps({ refreshing: Boolean })
 defineEmits(['refresh'])
+
+const auth = useAuthStore()
+const router = useRouter()
+const loggingOut = ref(false)
+
+async function handleLogout() {
+  loggingOut.value = true
+  try {
+    await auth.signOut()
+    router.push('/login')
+  } finally {
+    loggingOut.value = false
+  }
+}
 
 const navItems = [
   {

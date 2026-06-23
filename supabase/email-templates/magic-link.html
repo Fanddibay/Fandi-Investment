@@ -1,0 +1,108 @@
+<!--
+  PortfolioHQ — Magic Link sign-in email
+  Paste into: Supabase Dashboard → Authentication → Email Templates → Magic Link
+  Uses Supabase template var {{ .ConfirmationURL }} for the sign-in link.
+  Table-based + inline styles for email-client compatibility (Gmail, Outlook, Apple Mail).
+-->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="supported-color-schemes" content="dark light" />
+    <title>Sign in to PortfolioHQ</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#0f1117; -webkit-font-smoothing:antialiased; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <!-- Preheader (hidden preview text) -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:#0f1117;">
+      Your secure sign-in link for PortfolioHQ — expires in 1 hour.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f1117; padding:40px 16px;">
+      <tr>
+        <td align="center">
+
+          <!-- Card -->
+          <table role="presentation" width="440" cellpadding="0" cellspacing="0" style="width:440px; max-width:440px; background-color:#1a1d27; border:1px solid #2e3348; border-radius:16px; overflow:hidden;">
+
+            <!-- Header / brand -->
+            <tr>
+              <td style="padding:36px 40px 8px 40px;" align="center">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td style="background-color:#0ea5e9; border-radius:12px; width:48px; height:48px; text-align:center; vertical-align:middle; font-size:24px; font-weight:700; color:#0f1117; line-height:48px;">
+                      &#8599;
+                    </td>
+                  </tr>
+                </table>
+                <h1 style="margin:18px 0 0 0; font-size:22px; font-weight:700; color:#ffffff; letter-spacing:-0.02em;">
+                  Portfolio<span style="color:#38bdf8;">HQ</span>
+                </h1>
+                <p style="margin:4px 0 0 0; font-size:13px; color:#64748b;">Personal investment dashboard</p>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding:28px 40px 8px 40px;">
+                <h2 style="margin:0 0 10px 0; font-size:18px; font-weight:600; color:#ffffff;">Sign in to your dashboard</h2>
+                <p style="margin:0; font-size:14px; line-height:1.6; color:#94a3b8;">
+                  Click the button below to securely sign in. This link works once and expires in 1 hour.
+                </p>
+              </td>
+            </tr>
+
+            <!-- CTA button -->
+            <tr>
+              <td style="padding:24px 40px 8px 40px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td align="center" style="background-color:#0ea5e9; border-radius:10px;">
+                      <a href="{{ .ConfirmationURL }}" target="_blank"
+                         style="display:block; padding:14px 24px; font-size:15px; font-weight:600; color:#0f1117; text-decoration:none; letter-spacing:-0.01em;">
+                        Sign in to PortfolioHQ
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Fallback link -->
+            <tr>
+              <td style="padding:16px 40px 0 40px;">
+                <p style="margin:0 0 6px 0; font-size:12px; color:#64748b;">Or paste this link into your browser:</p>
+                <p style="margin:0; font-size:12px; line-height:1.5; word-break:break-all;">
+                  <a href="{{ .ConfirmationURL }}" style="color:#38bdf8; text-decoration:none;">{{ .ConfirmationURL }}</a>
+                </p>
+              </td>
+            </tr>
+
+            <!-- Divider -->
+            <tr>
+              <td style="padding:28px 40px 0 40px;">
+                <div style="height:1px; background-color:#2e3348; line-height:1px; font-size:0;">&nbsp;</div>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:20px 40px 32px 40px;">
+                <p style="margin:0; font-size:12px; line-height:1.6; color:#64748b;">
+                  Didn't request this? You can safely ignore this email — no one can access your account without this link.
+                </p>
+                <p style="margin:14px 0 0 0; font-size:11px; color:#475569; letter-spacing:0.04em; text-transform:uppercase;">
+                  PortfolioHQ &middot; Private access only
+                </p>
+              </td>
+            </tr>
+
+          </table>
+          <!-- /Card -->
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
